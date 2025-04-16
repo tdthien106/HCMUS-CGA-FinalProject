@@ -4,10 +4,12 @@ const Engine = Matter.Engine,
       World = Matter.World,
       Bodies = Matter.Bodies,
       Body = Matter.Body,
-      Events = Matter.Events;
+      Events = Matter.Events,
+      Composite = Matter.Composite;
 
+// Tạo engine
 const engine = Engine.create({
-    gravity: { x: 0, y: 0.5 }
+    gravity: { x: 0, y: 0.8 }
 });
 
 // Kích thước game
@@ -20,14 +22,16 @@ let pipes = [];
 let score = 0;
 let gameRunning = true;
 let pipeGap = 150;
-let pipeFrequency = 1500; // ms
+let pipeFrequency = 2000; // ms
 let lastPipeTime = 0;
-let ground;
-let ceiling;
+let ground, ceiling;
+let animationFrameId;
+let gameStarted = false;
 
 // Tạo bird
 function createBird() {
     const birdElem = document.getElementById('bird');
+    
     bird = Bodies.rectangle(
         gameWidth / 4, 
         gameHeight / 2, 
@@ -35,20 +39,24 @@ function createBird() {
         30, 
         { 
             restitution: 0.5,
+            friction: 0.01,
             render: {
-                visible: false // Ẩn hình ảnh mặc định của Matter.js
+                visible: false
             }
         }
     );
+    
     World.add(engine.world, bird);
     
     // Cập nhật vị trí bird element
     Events.on(engine, 'afterUpdate', function() {
+        if (!bird) return;
+        
         birdElem.style.left = (bird.position.x - 15) + 'px';
         birdElem.style.top = (bird.position.y - 15) + 'px';
         
         // Kiểm tra va chạm với ground/ceiling
-        if (bird.position.y > gameHeight || bird.position.y < 0) {
+        if (bird.position.y > gameHeight - 30 || bird.position.y < 30) {
             gameOver();
         }
     });
@@ -57,18 +65,19 @@ function createBird() {
 // Tạo ống
 function createPipe() {
     const pipeWidth = 60;
-    const gapPosition = Math.random() * (gameHeight - pipeGap - 100) + 50;
+    const minGapPosition = 100;
+    const maxGapPosition = gameHeight - 100 - pipeGap;
+    const gapPosition = Math.random() * (maxGapPosition - minGapPosition) + minGapPosition;
     
     // Ống trên
     const topPipe = Bodies.rectangle(
-        gameWidth, 
-        gapPosition - pipeGap/2, 
+        gameWidth + pipeWidth/2, 
+        gapPosition / 2, 
         pipeWidth, 
-        gapPosition - pipeGap/2, 
+        gapPosition, 
         { 
             isStatic: true,
             render: {
-                fillStyle: '#4caf50',
                 visible: false
             }
         }
@@ -76,39 +85,46 @@ function createPipe() {
     
     // Ống dưới
     const bottomPipe = Bodies.rectangle(
-        gameWidth, 
-        gapPosition + pipeGap/2 + (gameHeight - gapPosition - pipeGap/2)/2, 
+        gameWidth + pipeWidth/2, 
+        gapPosition + pipeGap + (gameHeight - gapPosition - pipeGap)/2, 
         pipeWidth, 
-        gameHeight - gapPosition - pipeGap/2, 
+        gameHeight - gapPosition - pipeGap, 
         { 
             isStatic: true,
             render: {
-                fillStyle: '#4caf50',
                 visible: false
             }
         }
     );
     
     World.add(engine.world, [topPipe, bottomPipe]);
-    pipes.push({ top: topPipe, bottom: bottomPipe, scored: false });
     
     // Tạo pipe elements
     const topPipeElem = document.createElement('div');
-    topPipeElem.className = 'pipe';
+    topPipeElem.className = 'pipe pipe-top';
     topPipeElem.style.left = gameWidth + 'px';
     topPipeElem.style.top = '0';
-    topPipeElem.style.height = (gapPosition - pipeGap/2) + 'px';
+    topPipeElem.style.height = gapPosition + 'px';
     
     const bottomPipeElem = document.createElement('div');
-    bottomPipeElem.className = 'pipe';
+    bottomPipeElem.className = 'pipe pipe-bottom';
     bottomPipeElem.style.left = gameWidth + 'px';
-    bottomPipeElem.style.top = (gapPosition + pipeGap/2) + 'px';
-    bottomPipeElem.style.height = (gameHeight - gapPosition - pipeGap/2) + 'px';
+    bottomPipeElem.style.top = (gapPosition + pipeGap) + 'px';
+    bottomPipeElem.style.height = (gameHeight - gapPosition - pipeGap) + 'px';
     
     document.getElementById('game-container').appendChild(topPipeElem);
     document.getElementById('game-container').appendChild(bottomPipeElem);
     
-    return { top: topPipe, bottom: bottomPipe, topElem: topPipeElem, bottomElem: bottomPipeElem };
+    const pipe = { 
+        top: topPipe, 
+        bottom: bottomPipe, 
+        topElem: topPipeElem, 
+        bottomElem: bottomPipeElem,
+        scored: false 
+    };
+    
+    pipes.push(pipe);
+    return pipe;
 }
 
 // Cập nhật pipes
@@ -127,17 +143,26 @@ function updatePipes() {
         }
         
         // Kiểm tra nếu bird đã vượt qua pipe
-        if (!pipe.scored && pipe.top.position.x < bird.position.x) {
+        if (!pipe.scored && pipe.top.position.x + 30 < bird.position.x) {
             pipe.scored = true;
             score++;
             document.getElementById('score').textContent = score;
+            
+            // Hiệu ứng điểm
+            const scoreElem = document.getElementById('score');
+            scoreElem.style.transform = 'scale(1.5)';
+            setTimeout(() => {
+                scoreElem.style.transform = 'scale(1)';
+            }, 200);
         }
         
         // Xóa pipes khi ra khỏi màn hình
         if (pipe.top.position.x < -60) {
             World.remove(engine.world, [pipe.top, pipe.bottom]);
-            document.getElementById('game-container').removeChild(pipe.topElem);
-            document.getElementById('game-container').removeChild(pipe.bottomElem);
+            if (pipe.topElem && pipe.bottomElem) {
+                document.getElementById('game-container').removeChild(pipe.topElem);
+                document.getElementById('game-container').removeChild(pipe.bottomElem);
+            }
             pipes.splice(i, 1);
         }
     }
@@ -145,10 +170,12 @@ function updatePipes() {
 
 // Kiểm tra va chạm
 function checkCollisions() {
+    if (!gameRunning || !bird) return;
+    
     for (let pipe of pipes) {
         if (
-            Matter.Collision.collides(bird, pipe.top, 1) || 
-            Matter.Collision.collides(bird, pipe.bottom, 1)
+            Matter.Collision.collides(bird, pipe.top) || 
+            Matter.Collision.collides(bird, pipe.bottom)
         ) {
             gameOver();
             break;
@@ -161,9 +188,16 @@ function gameOver() {
     if (!gameRunning) return;
     
     gameRunning = false;
-    Engine.clear(engine);
+    cancelAnimationFrame(animationFrameId);
+    
     document.getElementById('final-score').textContent = score;
     document.getElementById('game-over').style.display = 'block';
+    
+    // Hiệu ứng rơi khi game over
+    if (bird) {
+        Body.setVelocity(bird, { x: 0, y: 5 });
+        Body.setAngularVelocity(bird, 0.1);
+    }
 }
 
 // Reset game
@@ -184,54 +218,96 @@ function resetGame() {
     document.getElementById('game-over').style.display = 'none';
     
     // Tạo lại bird
-    World.remove(engine.world, bird);
+    if (bird) {
+        World.remove(engine.world, bird);
+    }
     createBird();
     
     // Reset game state
     gameRunning = true;
+    gameStarted = false;
     lastPipeTime = 0;
     
     // Khởi động lại engine
     Engine.run(engine);
+    startGame();
 }
 
-// Khởi tạo game
-function init() {
-    createBird();
+// Bắt đầu game
+function startGame() {
+    if (gameStarted) return;
+    gameStarted = true;
     
-    // Xử lý nhấn phím/click để bird nhảy
-    document.addEventListener('keydown', function(e) {
-        if (e.code === 'Space' && gameRunning) {
-            Body.setVelocity(bird, { x: 0, y: -8 });
-        }
-    });
-    
-    document.getElementById('game-container').addEventListener('click', function() {
-        if (gameRunning) {
-            Body.setVelocity(bird, { x: 0, y: -8 });
-        }
-    });
-    
-    // Nút restart
-    document.getElementById('restart-btn').addEventListener('click', resetGame);
-    
-    // Game loop
     function gameLoop() {
         if (gameRunning) {
             const currentTime = Date.now();
             if (currentTime - lastPipeTime > pipeFrequency) {
                 createPipe();
                 lastPipeTime = currentTime;
+                
+                // Tăng độ khó theo điểm
+                if (score > 0 && score % 5 === 0) {
+                    pipeFrequency = Math.max(1000, pipeFrequency - 100);
+                    pipeGap = Math.max(100, pipeGap - 5);
+                }
             }
             
             updatePipes();
             checkCollisions();
+            animationFrameId = requestAnimationFrame(gameLoop);
         }
-        requestAnimationFrame(gameLoop);
     }
     
-    // Bắt đầu game loop
     gameLoop();
+}
+
+// Khởi tạo game
+function init() {
+    // Tạo ground và ceiling cho physics
+    ground = Bodies.rectangle(gameWidth/2, gameHeight, gameWidth, 20, { 
+        isStatic: true,
+        render: { visible: false }
+    });
+    
+    ceiling = Bodies.rectangle(gameWidth/2, 0, gameWidth, 20, { 
+        isStatic: true,
+        render: { visible: false }
+    });
+    
+    World.add(engine.world, [ground, ceiling]);
+    
+    createBird();
+    
+    // Xử lý điều khiển
+    function jump() {
+        if (!gameRunning) return;
+        
+        if (!gameStarted) {
+            startGame();
+        }
+        
+        Body.setVelocity(bird, { x: 0, y: -8 });
+        
+        // Hiệu ứng nhảy
+        const birdElem = document.getElementById('bird');
+        birdElem.style.transform = 'scale(1.1, 0.9)';
+        setTimeout(() => {
+            birdElem.style.transform = 'scale(1)';
+        }, 100);
+    }
+    
+    document.addEventListener('keydown', function(e) {
+        if (e.code === 'Space') {
+            jump();
+        }
+    });
+    
+    document.getElementById('game-container').addEventListener('click', jump);
+    
+    // Nút restart
+    document.getElementById('restart-btn').addEventListener('click', resetGame);
+    
+    // Chạy engine
     Engine.run(engine);
 }
 
