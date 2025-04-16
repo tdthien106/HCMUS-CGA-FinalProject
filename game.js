@@ -27,6 +27,7 @@ let lastPipeTime = 0;
 let ground, ceiling;
 let animationFrameId;
 let gameStarted = false;
+let birdAngle = 0; // Biến để theo dõi góc xoay của chim
 
 // Tạo bird
 function createBird() {
@@ -52,8 +53,15 @@ function createBird() {
 	Events.on(engine, 'afterUpdate', function () {
 		if (!bird) return;
 
-		birdElem.style.left = (bird.position.x - 15) + 'px';
+		birdElem.style.left = (bird.position.x - 20) + 'px'; // Điều chỉnh vị trí center của chim
 		birdElem.style.top = (bird.position.y - 15) + 'px';
+
+		// Cập nhật góc xoay dựa vào vận tốc của chim
+		if (gameStarted) {
+			const yVelocity = bird.velocity.y;
+			birdAngle = Math.min(Math.max(yVelocity * 0.2, -0.5), 0.5); // Giới hạn góc xoay
+			birdElem.style.transform = `rotate(${birdAngle}rad)`;
+		}
 
 		// Kiểm tra va chạm với ground/ceiling
 		if (bird.position.y > gameHeight - 30 || bird.position.y < 30) {
@@ -216,6 +224,7 @@ function resetGame() {
 	score = 0;
 	document.getElementById('score').textContent = '0';
 	document.getElementById('game-over').style.display = 'none';
+	document.getElementById('start-message').style.display = 'block';
 
 	// Tạo lại bird
 	if (bird) {
@@ -227,6 +236,7 @@ function resetGame() {
 	gameRunning = true;
 	gameStarted = false;
 	lastPipeTime = 0;
+	birdAngle = 0;
 
 	// Reset difficulty
 	pipeGap = 150;
@@ -235,14 +245,18 @@ function resetGame() {
 	// KHÔNG khởi động lại engine ở đây, nó đã chạy rồi
 	// Engine.run(engine);
 
-	// Khởi động lại game
-	startGame();
+	// Reset vị trí bird
+	const birdElem = document.getElementById('bird');
+	birdElem.style.transform = 'rotate(0)';
 }
 
 // Bắt đầu game
 function startGame() {
 	if (gameStarted) return;
 	gameStarted = true;
+
+	// Ẩn thông báo bắt đầu
+	document.getElementById('start-message').style.display = 'none';
 
 	// Đảm bảo hủy bất kỳ animation frame nào đang chạy
 	if (animationFrameId) {
@@ -302,9 +316,10 @@ function init() {
 
 		// Hiệu ứng nhảy
 		const birdElem = document.getElementById('bird');
-		birdElem.style.transform = 'scale(1.1, 0.9)';
+		birdElem.style.transform = `rotate(-0.4rad) scale(1.1, 0.9)`;
 		setTimeout(() => {
-			birdElem.style.transform = 'scale(1)';
+			if (!gameRunning) return; // Tránh lỗi nếu game kết thúc
+			birdElem.style.transform = `rotate(${birdAngle}rad)`;
 		}, 100);
 	}
 

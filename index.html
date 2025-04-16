@@ -1,122 +1,32 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Flappy Bird - Matter.js</title>
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-        background-color: #70c5ce;
-        font-family: Arial, sans-serif;
-        overflow: hidden;
-      }
-      #game-container {
-        position: relative;
-        width: 400px;
-        height: 600px;
-        overflow: hidden;
-        background-color: #70c5ce;
-        border: 2px solid #000;
-      }
-      #bird {
-        position: absolute;
-        width: 30px;
-        height: 30px;
-        background-color: #ffeb3b;
-        border-radius: 50%;
-        z-index: 10;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-      }
-      .pipe {
-        position: absolute;
-        width: 60px;
-        background-color: #4caf50;
-        border: 2px solid #2e7d32;
-        box-sizing: border-box;
-      }
-      .pipe-top {
-        border-bottom: none;
-        border-radius: 5px 5px 0 0;
-      }
-      .pipe-bottom {
-        border-top: none;
-        border-radius: 0 0 5px 5px;
-      }
-      #score {
-        position: absolute;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        font-size: 32px;
-        color: white;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        z-index: 100;
-        font-weight: bold;
-      }
-      #game-over {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background-color: rgba(0, 0, 0, 0.8);
-        color: white;
-        padding: 30px;
-        border-radius: 15px;
-        text-align: center;
-        display: none;
-        z-index: 200;
-        width: 70%;
-      }
-      #restart-btn {
-        margin-top: 20px;
-        padding: 12px 24px;
-        background-color: #4caf50;
-        color: white;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 18px;
-        transition: background-color 0.3s;
-      }
-      #restart-btn:hover {
-        background-color: #388e3c;
-      }
-      #ground {
-        position: absolute;
-        bottom: 0;
-        width: 100%;
-        height: 20px;
-        background-color: #8d6e63;
-        z-index: 5;
-      }
-      #ceiling {
-        position: absolute;
-        top: 0;
-        width: 100%;
-        height: 20px;
-        background-color: #8d6e63;
-        z-index: 5;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="game-container">
-      <div id="ground"></div>
-      <div id="ceiling"></div>
-      <div id="bird"></div>
-      <div id="score">0</div>
-      <div id="game-over">
-        <h2>Game Over</h2>
-        <p>Your score: <span id="final-score">0</span></p>
-        <button id="restart-btn">Play Again</button>
-      </div>
-    </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.18.0/matter.min.js"></script>
-    <script src="game.js"></script>
-  </body>
+<head>
+	<title>Flappy Bird - Matter.js</title>
+	<link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+	<div id="game-container">
+		<div class="cloud cloud-1"></div>
+		<div class="cloud cloud-2"></div>
+		<div class="cloud cloud-3"></div>
+		<div id="ceiling"></div>
+		<div id="ground"></div>
+		<div id="bird"></div>
+		<div id="score">0</div>
+		<div id="start-message">
+			Nhấn phím Space hoặc nhấp chuột để chơi!
+		</div>
+		<div id="game-over">
+			<h2>Game Over</h2>
+			<p>Điểm của bạn: <span id="final-score">0</span></p>
+			<button id="restart-btn">Chơi lại</button>
+		</div>
+	</div>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.18.0/matter.min.js"></script>
+	<script type="module" src="js/main.js"></script>
+</body>
+
 </html>

@@ -1,0 +1,245 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+body {
+	margin: 0;
+	padding: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100vh;
+	background: linear-gradient(to bottom, #64b3f4, #c2e59c);
+	font-family: 'Press Start 2P', cursive;
+	overflow: hidden;
+}
+
+#game-container {
+	position: relative;
+	width: 400px;
+	height: 600px;
+	overflow: hidden;
+	background: linear-gradient(to bottom, #87CEEB, #c7ecee);
+	border: 4px solid #333;
+	border-radius: 12px;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+/* Animated clouds */
+.cloud {
+	position: absolute;
+	background: white;
+	border-radius: 50%;
+	box-shadow:
+		20px 0 0 white,
+		10px -15px 0 white,
+		30px -10px 0 white;
+	opacity: 0.8;
+	animation: cloud-move linear infinite;
+}
+
+.cloud-1 {
+	width: 50px;
+	height: 20px;
+	top: 80px;
+	left: 100%;
+	animation-duration: 25s;
+}
+
+.cloud-2 {
+	width: 70px;
+	height: 30px;
+	top: 150px;
+	left: 100%;
+	animation-duration: 35s;
+}
+
+.cloud-3 {
+	width: 40px;
+	height: 15px;
+	top: 50px;
+	left: 100%;
+	animation-duration: 20s;
+}
+
+@keyframes cloud-move {
+	0% {
+		left: 100%;
+	}
+
+	100% {
+		left: -100px;
+	}
+}
+
+#bird {
+	position: absolute;
+	width: 40px;
+	height: 30px;
+	background-color: #FDD835;
+	border-radius: 50% 50% 50% 20%;
+	z-index: 10;
+	box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+	transform-origin: center;
+	transition: transform 0.1s ease;
+}
+
+#bird::before {
+	content: '';
+	position: absolute;
+	width: 15px;
+	height: 8px;
+	background-color: #FF6F00;
+	border-radius: 50%;
+	top: 10px;
+	left: 35px;
+}
+
+#bird::after {
+	content: '';
+	position: absolute;
+	width: 8px;
+	height: 8px;
+	background-color: #000;
+	border-radius: 50%;
+	top: 7px;
+	left: 10px;
+}
+
+.pipe {
+	position: absolute;
+	width: 70px;
+	background: linear-gradient(to right, #2E7D32, #4CAF50, #2E7D32);
+	border: 3px solid #1B5E20;
+	box-sizing: border-box;
+}
+
+.pipe-top {
+	border-bottom: none;
+	border-radius: 8px 8px 0 0;
+}
+
+.pipe-top::after {
+	content: '';
+	position: absolute;
+	width: 86px;
+	height: 20px;
+	background: linear-gradient(to right, #1B5E20, #388E3C, #1B5E20);
+	left: -8px;
+	bottom: 0;
+	border-radius: 8px 8px 0 0;
+}
+
+.pipe-bottom {
+	border-top: none;
+	border-radius: 0 0 8px 8px;
+}
+
+.pipe-bottom::before {
+	content: '';
+	position: absolute;
+	width: 86px;
+	height: 20px;
+	background: linear-gradient(to right, #1B5E20, #388E3C, #1B5E20);
+	left: -8px;
+	top: 0;
+	border-radius: 0 0 8px 8px;
+}
+
+#score {
+	position: absolute;
+	top: 30px;
+	left: 50%;
+	transform: translateX(-50%);
+	font-size: 36px;
+	color: white;
+	text-shadow: 2px 2px 0 #333, -2px -2px 0 #333, 2px -2px 0 #333, -2px 2px 0 #333;
+	z-index: 100;
+	font-weight: bold;
+	transition: transform 0.2s ease;
+}
+
+#game-over {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background-color: rgba(0, 0, 0, 0.85);
+	color: white;
+	padding: 40px;
+	border-radius: 15px;
+	text-align: center;
+	display: none;
+	z-index: 200;
+	width: 70%;
+	border: 4px solid #FFD600;
+}
+
+#game-over h2 {
+	color: #FF6F00;
+	font-size: 24px;
+	margin-top: 0;
+}
+
+#restart-btn {
+	margin-top: 25px;
+	padding: 15px 25px;
+	background-color: #4caf50;
+	color: white;
+	border: none;
+	border-radius: 8px;
+	cursor: pointer;
+	font-size: 16px;
+	transition: all 0.3s;
+	font-family: 'Press Start 2P', cursive;
+	font-size: 14px;
+}
+
+#restart-btn:hover {
+	background-color: #388e3c;
+	transform: scale(1.05);
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+#ground {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	height: 40px;
+	background: linear-gradient(to bottom, #8d6e63 50%, #5D4037 100%);
+	z-index: 5;
+}
+
+#ground::after {
+	content: '';
+	position: absolute;
+	width: 100%;
+	height: 10px;
+	background: linear-gradient(90deg, #7D5E4F 25%, #8d6e63 25%, #8d6e63 50%, #7D5E4F 50%, #7D5E4F 75%, #8d6e63 75%);
+	background-size: 40px 10px;
+	top: -10px;
+	left: 0;
+}
+
+#ceiling {
+	position: absolute;
+	top: 0;
+	width: 100%;
+	height: 20px;
+	background-color: #64B5F6;
+	z-index: 5;
+}
+
+#start-message {
+	position: absolute;
+	top: 40%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	background-color: rgba(255, 255, 255, 0.8);
+	padding: 20px;
+	border-radius: 10px;
+	font-size: 18px;
+	text-align: center;
+	z-index: 100;
+	font-family: 'Press Start 2P', cursive;
+	font-size: 14px;
+	box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
