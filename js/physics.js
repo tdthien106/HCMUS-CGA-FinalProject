@@ -9,7 +9,6 @@ const World = Matter.World;
 const Bodies = Matter.Bodies;
 const Body = Matter.Body;
 const Events = Matter.Events;
-const Composite = Matter.Composite;
 
 // Tạo engine cho game
 const engine = Engine.create({
