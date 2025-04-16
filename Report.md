@@ -822,3 +822,54 @@ DIFFICULTY_DECREASE_FREQ: 100 // Đơn vị: millisecond (ms)
    - Các tỷ lệ này ảnh hưởng đến cảm giác không gian và khó khăn về mặt nhận thức
 
 Tất cả các thông số này được tinh chỉnh để tạo ra trải nghiệm chơi game cân bằng, vừa đủ thách thức nhưng không quá khó để khiến người chơi từ bỏ.
+
+Noboroto: Giải thích
+
+GitHub Copilot: # Giải thích mã trong bird.js
+
+Đoạn mã được chọn nằm trong phương thức `jump()` của lớp `Bird`, và phụ trách xử lý hiệu ứng khi nhân vật chim nhảy lên trong game:
+
+```javascript
+Physics.setVelocity(this.body, { x: 0, y: CONFIG.BIRD_JUMP_FORCE });
+
+// Hiệu ứng nhảy
+this.element.style.transform = `rotate(-0.4rad) scale(1.1, 0.9)`;
+```
+
+### Chi tiết giải thích:
+
+1. **Dòng đầu tiên**: 
+   - `Physics.setVelocity(this.body, { x: 0, y: CONFIG.BIRD_JUMP_FORCE })` - Đặt vận tốc cho vật thể chim.
+   - `this.body` là đối tượng vật lý của chim được khởi tạo trong phương thức `init()`
+   - `CONFIG.BIRD_JUMP_FORCE` là một giá trị âm từ file config, tạo hiệu ứng nhảy lên (trong hệ tọa độ game, trục y hướng xuống)
+   - `x: 0` giữ nguyên vận tốc theo phương ngang
+
+2. **Dòng thứ hai**:
+   - `this.element.style.transform = rotate(-0.4rad) scale(1.1, 0.9)` - Áp dụng biến đổi CSS cho phần tử HTML của chim
+   - `rotate(-0.4rad)` - Xoay chim ngược chiều kim đồng hồ để tạo dáng "ngước lên"
+   - `scale(1.1, 0.9)` - Làm phình ngang và nén dọc hình ảnh chim để tạo hiệu ứng "co cơ" khi nhảy
+
+Sau phần đang chọn, code còn có `setTimeout` để đưa chim về trạng thái bình thường sau 100ms, khôi phục góc xoay dựa vào vận tốc hiện tại.
+
+Noboroto: 2 tham số này có cần thiết cho game không?
+
+GitHub Copilot: # Tham số restitution và friction
+
+Hai tham số này có vai trò quan trọng trong việc tạo cảm giác vật lý thực tế cho nhân vật chim trong game:
+
+## restitution: 0.5
+- **Ý nghĩa**: Đây là hệ số đàn hồi (elasticity/bounciness) - xác định mức độ "nảy" khi vật thể va chạm
+- **Tác dụng trong game**: 
+  - Giá trị 0.5 (trung bình) giúp chim có khả năng nảy nhẹ khi chạm vào vật thể khác
+  - Tạo cảm giác chân thực hơn khi chim va chạm với đường ống hoặc mặt đất
+  - Nếu giá trị quá thấp (0), chim sẽ không nảy lên sau va chạm
+  - Nếu giá trị quá cao (1), chim sẽ nảy quá mạnh, làm gameplay khó kiểm soát
+
+## friction: 0.01
+- **Ý nghĩa**: Hệ số ma sát - ảnh hưởng đến mức độ cản trở chuyển động khi vật thể tiếp xúc
+- **Tác dụng trong game**:
+  - Giá trị rất nhỏ (0.01) giúp chim trượt dễ dàng, ít bị cản
+  - Tránh tình trạng chim bị "kẹt" hoặc "bám" vào đường ống khi va chạm
+  - Giúp chuyển động của chim mượt mà hơn
+
+Cả hai tham số này đều **cần thiết** cho game để tạo ra cảm giác vật lý tự nhiên và có thể điều chỉnh để thay đổi "cảm giác" khi chơi game. Tuy nhiên, giá trị cụ thể có thể được tinh chỉnh để phù hợp với trải nghiệm gameplay mong muốn.
